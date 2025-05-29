@@ -31,6 +31,32 @@ export default function CartPage() {
     pincode: '',
     mobile: ''
   });
+  const confettiRef = useRef();
+  useEffect(() => {
+    if (success && typeof success === 'object' && confettiRef.current) {
+      const canvas = confettiRef.current;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width = 400;
+      const H = canvas.height = 200;
+      let pieces = Array.from({length: 80}, () => ({
+        x: Math.random()*W, y: Math.random()*H/2,
+        r: Math.random()*8+4, c: `hsl(${Math.random()*360},90%,60%)`,
+        vx: Math.random()*4-2, vy: Math.random()*-2-2
+      }));
+      let frame = 0;
+      function draw() {
+        ctx.clearRect(0,0,W,H);
+        for (let p of pieces) {
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
+          ctx.fillStyle = p.c; ctx.fill();
+          p.x += p.vx; p.y += p.vy; p.vy += 0.1;
+        }
+        frame++;
+        if (frame < 60) requestAnimationFrame(draw);
+      }
+      draw();
+    }
+  }, [success]);
 
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
@@ -81,32 +107,6 @@ export default function CartPage() {
   }
 
   if (success && typeof success === 'object') {
-    // Confetti effect
-    const confettiRef = useRef();
-    useEffect(() => {
-      if (!confettiRef.current) return;
-      const canvas = confettiRef.current;
-      const ctx = canvas.getContext('2d');
-      const W = canvas.width = 400;
-      const H = canvas.height = 200;
-      let pieces = Array.from({length: 80}, () => ({
-        x: Math.random()*W, y: Math.random()*H/2,
-        r: Math.random()*8+4, c: `hsl(${Math.random()*360},90%,60%)`,
-        vx: Math.random()*4-2, vy: Math.random()*-2-2
-      }));
-      let frame = 0;
-      function draw() {
-        ctx.clearRect(0,0,W,H);
-        for (let p of pieces) {
-          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
-          ctx.fillStyle = p.c; ctx.fill();
-          p.x += p.vx; p.y += p.vy; p.vy += 0.1;
-        }
-        frame++;
-        if (frame < 60) requestAnimationFrame(draw);
-      }
-      draw();
-    }, []);
     return (
       <main style={{ textAlign: 'center', marginTop: '4rem' }}>
         <canvas ref={confettiRef} style={{ display: 'block', margin: '0 auto 2rem', pointerEvents: 'none', background: 'transparent' }} width={400} height={200}></canvas>
