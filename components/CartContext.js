@@ -2,9 +2,17 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 export const CartContext = createContext();
+export const OrdersContext = createContext();
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
+  const [orders, setOrders] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem("orders");
+      return stored ? JSON.parse(stored) : [];
+    }
+    return [];
+  });
 
   useEffect(() => {
     const stored = typeof window !== 'undefined' ? localStorage.getItem("cart") : null;
@@ -14,8 +22,9 @@ export function CartProvider({ children }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem("cart", JSON.stringify(cart));
+      localStorage.setItem("orders", JSON.stringify(orders));
     }
-  }, [cart]);
+  }, [cart, orders]);
 
   function addToCart(product, withFee = false) {
     const item = withFee ? { ...product, price: product.price + 5, fee: 5 } : { ...product };
@@ -27,10 +36,15 @@ export function CartProvider({ children }) {
   function clearCart() {
     setCart([]);
   }
+  function addOrder(order) {
+    setOrders(prev => [...prev, order]);
+  }
 
   return (
     <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
-      {children}
+      <OrdersContext.Provider value={{ orders, addOrder }}>
+        {children}
+      </OrdersContext.Provider>
     </CartContext.Provider>
   );
-} 
+}

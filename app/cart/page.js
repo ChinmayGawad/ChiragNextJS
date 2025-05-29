@@ -1,6 +1,6 @@
 "use client";
 import { useContext, useState, useEffect, useRef } from "react";
-import { CartContext } from "../../components/CartContext";
+import { CartContext, OrdersContext } from "../../components/CartContext";
 import { useSearchParams } from "next/navigation";
 
 function validateCard(card) {
@@ -16,6 +16,7 @@ function validateUPI(upi) {
 
 export default function CartPage() {
   const { cart, removeFromCart, clearCart } = useContext(CartContext);
+  const { addOrder } = useContext(OrdersContext);
   const [showCheckout, setShowCheckout] = useState(false);
   const [paymentType, setPaymentType] = useState("card");
   const [card, setCard] = useState({ number: "", expiry: "", cvv: "" });
@@ -89,6 +90,13 @@ export default function CartPage() {
       }
     }
     let method = paymentType === 'card' ? 'Card' : paymentType === 'upi' ? 'UPI' : 'Cash on Delivery';
+    const order = {
+      items: cart,
+      total,
+      paymentType: method,
+      date: new Date().toLocaleString()
+    };
+    addOrder(order);
     setSuccess({
       message: "Payment successful! Thank you for your purchase.",
       method,
@@ -206,4 +214,4 @@ export default function CartPage() {
       </div>
     </main>
   );
-} 
+}
